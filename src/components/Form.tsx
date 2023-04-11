@@ -1,18 +1,9 @@
-type FormProps = Omit<React.FormHTMLAttributes<HTMLFormElement>, "onSubmit"> & {
-  onSubmit: (values: Record<string, string>) => any;
-};
-
-const Form = (props: FormProps) => (
+const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => (
   <form
     {...props}
     onSubmit={(e) => {
       e.preventDefault();
-      const inputs = document.getElementsByTagName("input");
-      const values = Array.from(inputs).reduce((acc, input) => {
-        const { name } = input;
-        return { ...acc, [name]: e.currentTarget[name].value };
-      }, {});
-      props.onSubmit(values);
+      props.onSubmit && props.onSubmit(e);
     }}
   >
     {props.children}
