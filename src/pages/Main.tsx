@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { withAuth } from "../hocs/withAuth";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -21,4 +22,4 @@ const Main = () => (
   </Layout>
 );
 
-export default Main;
+export default withAuth(Main, "guest");

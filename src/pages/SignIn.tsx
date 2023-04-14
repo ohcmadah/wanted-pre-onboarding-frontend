@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
-import { signUp } from "../common/apis";
+import { signIn } from "../common/apis";
 import { getAPIError, isAPIError } from "../common/utils";
+import token from "../common/token";
 import { withAuth } from "../hocs/withAuth";
 
 import Layout from "../components/Layout";
@@ -13,7 +14,7 @@ import ModalPortal from "../components/ModalPortal";
 import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 
-const SignUp = () => {
+const SignIn = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<APIError["message"] | null>(null);
@@ -23,22 +24,26 @@ const SignUp = () => {
   );
   const isError = Object.keys(errors).length !== 0;
 
-  const onSignUp: React.FormEventHandler<HTMLFormElement> = async (_e) => {
+  const onSignIn: React.FormEventHandler<HTMLFormElement> = async (_e) => {
     const { email, password } = values;
     if (isError || typeof email !== "string" || typeof password !== "string") {
       return setError("이메일 또는 비밀번호가 잘못 입력되었습니다.");
     }
     setIsLoading(true);
     try {
-      const res = await signUp(email, password);
-      if (res.status === 201) {
-        navigate("/signin");
-      } else if (isAPIError(res.data)) {
-        setError(res.data.message);
+      const res = await signIn(email, password);
+      if (!isAPIError(res.data) && res.status === 200) {
+        const { access_token } = res.data;
+        token.set(access_token);
+        navigate("/todo");
       }
     } catch (error) {
       const apiError = getAPIError(error);
-      setError(apiError?.message || "알 수 없는 에러가 발생했습니다.");
+      if (apiError) {
+        setError(apiError.statusCode === 401 ? "이메일과 비밀번호를 다시 확인해 주세요." : apiError.message);
+      } else {
+        setError("알 수 없는 에러가 발생했습니다.");
+      }
     }
     setIsLoading(false);
   };
@@ -50,15 +55,15 @@ const SignUp = () => {
           <Link to="/" className="px-2 mr-2">
             〈
           </Link>
-          회원가입
+          로그인
         </h2>
       </Header>
       <main>
-        <Form className="flex flex-col max-w-[500px] w-full" onSubmit={onSignUp}>
+        <Form className="flex flex-col max-w-[500px] w-full" onSubmit={onSignIn}>
           <Form.Email value={values.email} onChange={onChange} />
           <Form.Password value={values.password} onChange={onChange} />
-          <Form.Submit disabled={isError} testid="signup-button">
-            회원가입
+          <Form.Submit disabled={isError} testid="signin-button">
+            로그인
           </Form.Submit>
         </Form>
       </main>
@@ -74,4 +79,4 @@ const SignUp = () => {
   );
 };
 
-export default withAuth(SignUp, "guest");
+export default withAuth(SignIn, "guest");
