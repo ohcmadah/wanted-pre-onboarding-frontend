@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signUp } from "../common/apis";
-import { getAPIErrorMessage, isAPIError } from "../common/utils";
+import { getAPIError, isAPIError } from "../common/utils";
+import { withAuth } from "../hocs/withAuth";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -36,8 +37,8 @@ const SignUp = () => {
         setError(res.data.message);
       }
     } catch (error) {
-      const errorMsg = getAPIErrorMessage(error);
-      setError(errorMsg);
+      const apiError = getAPIError(error);
+      setError(apiError?.message || "알 수 없는 에러가 발생했습니다.");
     }
     setIsLoading(false);
   };
@@ -73,4 +74,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default withAuth(SignUp, "guest");

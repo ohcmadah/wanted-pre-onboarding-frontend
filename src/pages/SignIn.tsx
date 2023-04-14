@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signIn } from "../common/apis";
-import { getAPIErrorMessage, isAPIError } from "../common/utils";
+import { getAPIError, isAPIError } from "../common/utils";
 import token from "../common/token";
+import { withAuth } from "../hocs/withAuth";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -35,12 +36,14 @@ const SignIn = () => {
         const { access_token } = res.data;
         token.set(access_token);
         navigate("/todo");
-      } else if (isAPIError(res.data)) {
-        setError(res.data.message);
       }
     } catch (error) {
-      const errorMsg = getAPIErrorMessage(error);
-      setError(errorMsg);
+      const apiError = getAPIError(error);
+      if (apiError) {
+        setError(apiError.statusCode === 401 ? "이메일과 비밀번호를 다시 확인해 주세요." : apiError.message);
+      } else {
+        setError("알 수 없는 에러가 발생했습니다.");
+      }
     }
     setIsLoading(false);
   };
@@ -76,4 +79,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default withAuth(SignIn, "guest");
