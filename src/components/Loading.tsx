@@ -1,6 +1,6 @@
 import { Background } from "./Popup";
 
-const Spinner = ({ width = 32, height = 32 }: Pick<React.SVGAttributes<SVGSVGElement>, "width" | "height">) => (
+export const Spinner = ({ width = 32, height = 32 }: Pick<React.SVGAttributes<SVGSVGElement>, "width" | "height">) => (
   <svg
     className="inline-block animate-spin"
     width={width}

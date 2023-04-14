@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signIn } from "../common/apis";
-import { getAPIError, isAPIError } from "../common/utils";
+import { getAPIError } from "../common/utils";
 import token from "../common/token";
-import { withAuth } from "../hocs/withAuth";
+import { useAuth } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -32,7 +32,7 @@ const SignIn = () => {
     setIsLoading(true);
     try {
       const res = await signIn(email, password);
-      if (!isAPIError(res.data) && res.status === 200) {
+      if (res.status === 200) {
         const { access_token } = res.data;
         token.set(access_token);
         navigate("/todo");
@@ -79,4 +79,14 @@ const SignIn = () => {
   );
 };
 
-export default withAuth(SignIn, "guest");
+const SignInWrapper = () => {
+  const auth = useAuth();
+
+  if (auth.isAuthenticated) {
+    return <Navigate to="/todo" />;
+  }
+
+  return <SignIn />;
+};
+
+export default SignInWrapper;

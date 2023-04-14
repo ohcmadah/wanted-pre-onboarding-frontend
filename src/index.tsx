@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Main from "./pages/Main";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
+import TodoList from "./pages/TodoList";
 
 import "./styles/index.css";
 import { AuthContextProvider } from "./contexts/AuthContext";
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
   {
     path: "/signin",
     element: <SignIn />,
+  },
+  {
+    path: "/todo",
+    element: <TodoList />,
   },
 ]);
 
