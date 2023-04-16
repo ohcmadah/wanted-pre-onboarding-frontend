@@ -44,3 +44,12 @@ export const updateTodo = (id: Todo["id"], todo: Todo["todo"], isCompleted: Todo
     }
   );
 };
+
+type DeleteTodoBody = {};
+export const deleteTodo = (id: Todo["id"], token: string) => {
+  return axios.delete<DeleteTodoBody>("/api/todos/" + id, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+};

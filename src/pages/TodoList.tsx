@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { createTodo, getTodos, updateTodo } from "../common/apis";
+import { createTodo, deleteTodo, getTodos, updateTodo } from "../common/apis";
 import { useAsyncAPI } from "../hooks/useAsyncAPI";
 import { useAuthState } from "../contexts/AuthContext";
 import { useInput } from "../hooks/useInput";
@@ -14,8 +14,9 @@ import Popup from "../components/Popup";
 import Input from "../components/Input";
 import Form from "../components/Form";
 
-type AddFn = (todo: string) => any;
+type AddFn = (todo: Todo["todo"]) => any;
 type EditFn = (id: Todo["id"], todo: Todo["todo"], isCompleted: Todo["isCompleted"]) => any;
+type DeleteFn = (id: Todo["id"]) => any;
 
 const Button = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
@@ -38,7 +39,7 @@ const Checkbox = (props: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type
   <input {...props} type="checkbox" className={["mr-3", props.className].join(" ")} />
 );
 
-const Todo = ({ id, todo, isCompleted, onEdit }: Todo & { onEdit: EditFn }) => {
+const Todo = ({ id, todo, isCompleted, onEdit, onDelete }: Todo & { onEdit: EditFn; onDelete: DeleteFn }) => {
   const newTodo = useInput(todo);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -49,6 +50,7 @@ const Todo = ({ id, todo, isCompleted, onEdit }: Todo & { onEdit: EditFn }) => {
   };
   const startEditing = () => setIsEditing(true);
   const onEditTodo = () => onEdit(id, newTodo.value, isCompleted);
+  const onDeleteTodo = () => onDelete(id);
 
   if (isEditing) {
     return (
@@ -76,7 +78,7 @@ const Todo = ({ id, todo, isCompleted, onEdit }: Todo & { onEdit: EditFn }) => {
       <Button data-testid="modify-button" onClick={startEditing}>
         수정
       </Button>
-      <Button data-testid="delete-button" onClick={() => {}}>
+      <Button data-testid="delete-button" onClick={onDeleteTodo}>
         삭제
       </Button>
     </TodoContainer>
@@ -97,7 +99,15 @@ const NewTodo = ({ onAdd }: { onAdd: AddFn }) => {
   );
 };
 
-const Todos = ({ todos, onEdit }: { todos: ReturnType<typeof useAsyncAPI<typeof getTodos>>; onEdit: EditFn }) => {
+const Todos = ({
+  todos,
+  onEdit,
+  onDelete,
+}: {
+  todos: ReturnType<typeof useAsyncAPI<typeof getTodos>>;
+  onEdit: EditFn;
+  onDelete: DeleteFn;
+}) => {
   switch (todos.state) {
     case "loading":
       return <Spinner />;
@@ -113,7 +123,7 @@ const Todos = ({ todos, onEdit }: { todos: ReturnType<typeof useAsyncAPI<typeof 
       return (
         <ul>
           {data.map((todo) => (
-            <Todo key={todo.id} {...todo} onEdit={onEdit} />
+            <Todo key={todo.id} {...todo} onEdit={onEdit} onDelete={onDelete} />
           ))}
         </ul>
       );
@@ -130,7 +140,7 @@ const TodoList = ({ token }: { token: string }) => {
     setIsLoading(true);
     try {
       const res = await api(...args);
-      if (res.status === 200 || res.status === 201) {
+      if (res.status === 200 || res.status === 201 || res.status === 204) {
         todos.forceUpdate();
       }
     } catch (error) {
@@ -145,6 +155,7 @@ const TodoList = ({ token }: { token: string }) => {
 
   const onAdd: AddFn = (todo) => fetch(createTodo, todo, token);
   const onEdit: EditFn = (id, todo, isCompleted) => fetch(updateTodo, id, todo, isCompleted, token);
+  const onDelete: DeleteFn = (id) => fetch(deleteTodo, id, token);
 
   return (
     <Layout>
@@ -154,7 +165,7 @@ const TodoList = ({ token }: { token: string }) => {
 
       <main>
         <NewTodo onAdd={onAdd} />
-        <Todos todos={todos} onEdit={onEdit} />
+        <Todos todos={todos} onEdit={onEdit} onDelete={onDelete} />
       </main>
 
       <ModalPortal>
