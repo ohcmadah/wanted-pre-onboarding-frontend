@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signIn } from "../common/apis";
 import { getAPIError } from "../common/utils";
-import token from "../common/token";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuthDispatch, useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -15,7 +14,6 @@ import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 
 const SignIn = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<APIError["message"] | null>(null);
   const { values, errors, onChange } = useForm(
@@ -23,6 +21,7 @@ const SignIn = () => {
     { email: emailValidator, password: passwordValidator }
   );
   const isError = Object.keys(errors).length !== 0;
+  const authDispatch = useAuthDispatch();
 
   const onSignIn: React.FormEventHandler<HTMLFormElement> = async (_e) => {
     const { email, password } = values;
@@ -34,8 +33,7 @@ const SignIn = () => {
       const res = await signIn(email, password);
       if (res.status === 200) {
         const { access_token } = res.data;
-        token.set(access_token);
-        navigate("/todo");
+        authDispatch({ type: "SIGNIN", token: access_token });
       }
     } catch (error) {
       const apiError = getAPIError(error);
@@ -80,7 +78,7 @@ const SignIn = () => {
 };
 
 const SignInWrapper = () => {
-  const auth = useAuth();
+  const auth = useAuthState();
 
   if (auth.isAuthenticated) {
     return <Navigate to="/todo" />;

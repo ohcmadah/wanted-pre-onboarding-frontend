@@ -1,12 +1,12 @@
 import { Link, Navigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
 import Button from "../components/Button";
 
 const Main = () => {
-  const auth = useAuth();
+  const auth = useAuthState();
 
   if (auth.isAuthenticated) {
     return <Navigate to="/todo" />;

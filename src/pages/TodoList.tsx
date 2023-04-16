@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { createTodo, getTodos } from "../common/apis";
 import { useAsyncAPI } from "../hooks/useAsyncAPI";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuthState } from "../contexts/AuthContext";
 import { useInput } from "../hooks/useInput";
 import { getAPIError } from "../common/utils";
 
@@ -107,7 +107,7 @@ const TodoList = ({ token }: { token: string }) => {
 };
 
 const TodoListWrapper = () => {
-  const auth = useAuth();
+  const auth = useAuthState();
 
   if (!auth.isAuthenticated) {
     return <Navigate to="/signin" />;
