@@ -20,10 +20,23 @@ export const getTodos = (token: string) => {
 };
 
 type CreateTodoBody = Todo;
-export const createTodo = (todo: string, token: string) => {
+export const createTodo = (todo: Todo["todo"], token: string) => {
   return axios.post<CreateTodoBody>(
     "/api/todos",
     { todo },
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+};
+
+type UpdateTodoBody = Todo;
+export const updateTodo = (id: Todo["id"], todo: Todo["todo"], isCompleted: Todo["isCompleted"], token: string) => {
+  return axios.put<UpdateTodoBody>(
+    "/api/todos/" + id,
+    { todo, isCompleted },
     {
       headers: {
         Authorization: "Bearer " + token,

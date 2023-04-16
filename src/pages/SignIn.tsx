@@ -33,7 +33,7 @@ const SignIn = () => {
       const res = await signIn(email, password);
       if (res.status === 200) {
         const { access_token } = res.data;
-        authDispatch({ type: "SIGNIN", token: access_token });
+        authDispatch({ type: "SIGNIN", payload: { token: access_token } });
       }
     } catch (error) {
       const apiError = getAPIError(error);
@@ -60,7 +60,7 @@ const SignIn = () => {
         <Form className="flex flex-col max-w-[500px] w-full" onSubmit={onSignIn}>
           <Form.Email value={values.email} onChange={onChange} />
           <Form.Password value={values.password} onChange={onChange} />
-          <Form.Submit disabled={isError} testid="signin-button">
+          <Form.Submit className="mt-8" disabled={isError} testid="signin-button">
             로그인
           </Form.Submit>
         </Form>

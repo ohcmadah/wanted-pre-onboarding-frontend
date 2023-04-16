@@ -57,7 +57,7 @@ const SignUp = () => {
         <Form className="flex flex-col max-w-[500px] w-full" onSubmit={onSignUp}>
           <Form.Email value={values.email} onChange={onChange} />
           <Form.Password value={values.password} onChange={onChange} />
-          <Form.Submit disabled={isError} testid="signup-button">
+          <Form.Submit className="mt-8" disabled={isError} testid="signup-button">
             회원가입
           </Form.Submit>
         </Form>

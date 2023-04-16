@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer } from "react";
 import token from "../common/token";
 
 type State = { isAuthenticated: true; token: string } | { isAuthenticated: false };
-type Action = { type: "SIGNIN"; token: string };
+type Action = { type: "SIGNIN"; payload: { token: string } };
 type AuthDispatch = React.Dispatch<Action>;
 
 const StateContext = createContext<State | undefined>(undefined);
@@ -18,8 +18,8 @@ const createState = (token?: string | null): State => {
 const reducer = (_state: State, action: Action): State => {
   switch (action.type) {
     case "SIGNIN":
-      token.set(action.token);
-      return { isAuthenticated: true, token: action.token };
+      token.set(action.payload.token);
+      return { isAuthenticated: true, token: action.payload.token };
 
     default:
       throw new Error("Unhandled action");

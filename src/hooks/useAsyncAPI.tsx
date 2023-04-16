@@ -6,7 +6,6 @@ type State<T> =
   | { state: "loading"; isLoading: true; isError: false; error: null }
   | { state: "error"; isLoading: false; isError: true; error: string }
   | { state: "loaded"; isLoading: false; isError: false; error: null; data: T };
-type API = (...args: any[]) => Promise<any>;
 
 export const useAsyncAPI = <F extends API>(api: F, ...args: Parameters<F>) => {
   type Data = Awaited<ReturnType<F>>;
