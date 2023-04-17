@@ -52,7 +52,7 @@ const Submit = (props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type
     type="submit"
     data-testid={props.testid}
     className={[
-      "bg-primary text-white font-medium mt-8 disabled:bg-gray-400 disabled:cursor-not-allowed",
+      "bg-primary text-white font-medium disabled:bg-gray-400 disabled:cursor-not-allowed",
       props.className,
     ].join(" ")}
   >

@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signIn } from "../common/apis";
-import { getAPIError, isAPIError } from "../common/utils";
-import token from "../common/token";
-import { withAuth } from "../hocs/withAuth";
+import { getAPIError } from "../common/utils";
+import { useAuthDispatch, useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -15,7 +14,6 @@ import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 
 const SignIn = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<APIError["message"] | null>(null);
   const { values, errors, onChange } = useForm(
@@ -23,6 +21,7 @@ const SignIn = () => {
     { email: emailValidator, password: passwordValidator }
   );
   const isError = Object.keys(errors).length !== 0;
+  const authDispatch = useAuthDispatch();
 
   const onSignIn: React.FormEventHandler<HTMLFormElement> = async (_e) => {
     const { email, password } = values;
@@ -32,10 +31,9 @@ const SignIn = () => {
     setIsLoading(true);
     try {
       const res = await signIn(email, password);
-      if (!isAPIError(res.data) && res.status === 200) {
+      if (res.status === 200) {
         const { access_token } = res.data;
-        token.set(access_token);
-        navigate("/todo");
+        authDispatch({ type: "SIGNIN", payload: { token: access_token } });
       }
     } catch (error) {
       const apiError = getAPIError(error);
@@ -62,7 +60,7 @@ const SignIn = () => {
         <Form className="flex flex-col max-w-[500px] w-full" onSubmit={onSignIn}>
           <Form.Email value={values.email} onChange={onChange} />
           <Form.Password value={values.password} onChange={onChange} />
-          <Form.Submit disabled={isError} testid="signin-button">
+          <Form.Submit className="mt-8" disabled={isError} testid="signin-button">
             로그인
           </Form.Submit>
         </Form>
@@ -79,4 +77,14 @@ const SignIn = () => {
   );
 };
 
-export default withAuth(SignIn, "guest");
+const SignInWrapper = () => {
+  const auth = useAuthState();
+
+  if (auth.isAuthenticated) {
+    return <Navigate to="/todo" />;
+  }
+
+  return <SignIn />;
+};
+
+export default SignInWrapper;
