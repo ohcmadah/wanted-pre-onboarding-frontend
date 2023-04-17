@@ -12,3 +12,5 @@ export const getAPIError = (error: unknown) => {
   }
   return null;
 };
+
+export const partial = (f: Function, ...args: any[]) => f.bind(null, ...args);

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createTodo, deleteTodo, getTodos, updateTodo } from "../common/apis";
 import { useAsyncAPI } from "../hooks/useAsyncAPI";
-import { useAuthState } from "../contexts/AuthContext";
 import { useInput } from "../hooks/useInput";
-import { getAPIError } from "../common/utils";
+import { getAPIError, partial } from "../common/utils";
 
 import Header from "../components/Header";
 import Layout from "../components/Layout";
@@ -13,10 +12,11 @@ import Loading, { Spinner } from "../components/Loading";
 import Popup from "../components/Popup";
 import Input from "../components/Input";
 import Form from "../components/Form";
+import { withAuth } from "../hocs/withAuth";
 
-type AddFn = (todo: Todo["todo"]) => any;
-type EditFn = (id: Todo["id"], todo: Todo["todo"], isCompleted: Todo["isCompleted"]) => any;
-type DeleteFn = (id: Todo["id"]) => any;
+type AddFn = (...args: Parameters<typeof createTodo>) => any;
+type EditFn = (...args: Parameters<typeof updateTodo>) => any;
+type DeleteFn = (...args: Parameters<typeof deleteTodo>) => any;
 
 const Button = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
@@ -130,11 +130,17 @@ const Todos = ({
   }
 };
 
-const TodoList = ({ token }: { token: string }) => {
+const TodoList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<APIError | null>(null);
-  const todos = useAsyncAPI(() => getTodos(token));
+  const todos = useAsyncAPI(getTodos);
   const navigate = useNavigate();
+
+  const redirectSignIn = (error: APIError) => {
+    if (error.statusCode === 401) {
+      navigate("/signin");
+    }
+  };
 
   const fetch = async <F extends API>(api: F, ...args: Parameters<F>) => {
     setIsLoading(true);
@@ -153,9 +159,9 @@ const TodoList = ({ token }: { token: string }) => {
     setIsLoading(false);
   };
 
-  const onAdd: AddFn = (todo) => fetch(createTodo, todo, token);
-  const onEdit: EditFn = (id, todo, isCompleted) => fetch(updateTodo, id, todo, isCompleted, token);
-  const onDelete: DeleteFn = (id) => fetch(deleteTodo, id, token);
+  const onAdd: AddFn = partial(fetch, createTodo);
+  const onEdit: EditFn = partial(fetch, updateTodo);
+  const onDelete: DeleteFn = partial(fetch, deleteTodo);
 
   return (
     <Layout>
@@ -171,17 +177,21 @@ const TodoList = ({ token }: { token: string }) => {
       <ModalPortal>
         {isLoading && <Loading />}
         {todos.isError && (
-          <Popup title="문제가 발생했습니다." onClose={todos.forceUpdate}>
-            {todos.error}
+          <Popup
+            title="문제가 발생했습니다."
+            onClose={() => {
+              redirectSignIn(todos.error);
+              todos.forceUpdate();
+            }}
+          >
+            {todos.error.message}
           </Popup>
         )}
         {error && (
           <Popup
             title="문제가 발생했습니다."
             onClose={() => {
-              if (error.statusCode === 401) {
-                navigate("/signin");
-              }
+              redirectSignIn(error);
               setError(null);
             }}
           >
@@ -193,14 +203,4 @@ const TodoList = ({ token }: { token: string }) => {
   );
 };
 
-const TodoListWrapper = () => {
-  const auth = useAuthState();
-
-  if (!auth.isAuthenticated) {
-    return <Navigate to="/signin" />;
-  }
-
-  return <TodoList token={auth.token} />;
-};
-
-export default TodoListWrapper;
+export default withAuth(TodoList, "auth");
