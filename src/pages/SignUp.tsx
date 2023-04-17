@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
 import { emailValidator, passwordValidator } from "../common/validators";
 import { signUp } from "../common/apis";
 import { getAPIError, isAPIError } from "../common/utils";
-import { useAuthState } from "../contexts/AuthContext";
+import { withAuth } from "../hocs/withAuth";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -74,14 +74,4 @@ const SignUp = () => {
   );
 };
 
-const SignUpWrapper = () => {
-  const auth = useAuthState();
-
-  if (auth.isAuthenticated) {
-    return <Navigate to="/todo" />;
-  }
-
-  return <SignUp />;
-};
-
-export default SignUpWrapper;
+export default withAuth(SignUp, "guest");
