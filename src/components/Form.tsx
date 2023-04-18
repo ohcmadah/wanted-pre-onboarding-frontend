@@ -46,11 +46,10 @@ const Password = ({ value, onChange }: Pick<React.InputHTMLAttributes<HTMLInputE
   </>
 );
 
-const Submit = (props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> & { testid: string }) => (
+const Submit = (props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type">) => (
   <Button
     {...props}
     type="submit"
-    data-testid={props.testid}
     className={[
       "bg-primary text-white font-medium disabled:bg-gray-400 disabled:cursor-not-allowed",
       props.className,

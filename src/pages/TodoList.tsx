@@ -94,7 +94,7 @@ const NewTodo = ({ onAdd }: { onAdd: AddFn }) => {
   return (
     <Form className="flex gap-x-3 mb-5" onSubmit={onSubmit}>
       <Input value={todo.value} onChange={todo.onChange} className="w-full" data-testid="new-todo-input" />
-      <Form.Submit testid="new-todo-add-button">추가</Form.Submit>
+      <Form.Submit data-testid="new-todo-add-button">추가</Form.Submit>
     </Form>
   );
 };
