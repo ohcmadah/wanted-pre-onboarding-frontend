@@ -1,11 +1,11 @@
 const storage = {
   isSupported: typeof window["localStorage"] !== "undefined" && window["localStorage"] !== null,
 
-  get: <T>(key: string) => {
+  get: <T>(key: string): T | null => {
     try {
       const item = localStorage.getItem(key);
       if (item) {
-        return JSON.parse(item) as T;
+        return JSON.parse(item);
       }
       return null;
     } catch (error) {
